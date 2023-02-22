@@ -17,9 +17,8 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  # For details on connection pooling, see Rails configuration guide
-  # https://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: <%= ENV["POSTGRES_USERNAME"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
 
 development:
   <<: *default
@@ -82,5 +81,3 @@ test:
 production:
   <<: *default
   database: splitwise_backend_production
-  username: splitwise_backend
-  password: <%= ENV["SPLITWISE_BACKEND_DATABASE_PASSWORD"] %>
