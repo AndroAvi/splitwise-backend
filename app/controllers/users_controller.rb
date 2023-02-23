@@ -25,13 +25,30 @@ class UsersController < ApplicationController
     end
   end
 
+  def search
+    @users = case search_params[:by]
+             when 'name' then User.where(name: search_params[:value])
+             when 'email' then User.where(email: search_params[:value])
+             else []
+             end
+    if @users
+      render json: { user: UsersBlueprint.render_as_json(@users) }, status: :ok
+    else
+      render json: { error: 'No user found' }, status: :not_found
+    end
+  end
+
   private
 
   def user_params
- 	  params.require(:user).permit(:name, :email, :password)
+    params.require(:user).permit(:name, :email, :password)
   end
 
-	 def login_params
+  def login_params
     params.permit(:email, :password)
+  end
+
+  def search_params
+    params.permit(:by, :value)
   end
 end
