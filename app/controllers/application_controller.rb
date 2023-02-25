@@ -10,7 +10,7 @@ class ApplicationController < ActionController::API
   end
 
   def authorize
-    return render json: { error: 'No token provided.' }, status: :unauthorized unless auth_header
+    return render json: { error: ['No token provided.'] }, status: :unauthorized unless auth_header
 
     begin
       decoded = JWT.decode(auth_header.split(' ')[1], ENV['JWT_SECRET'], true, algorithm: 'HS256')

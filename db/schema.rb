@@ -10,15 +10,41 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_23_070215) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_24_155130) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "expenses", force: :cascade do |t|
+    t.string "title"
+    t.integer "category"
+    t.float "amount"
+    t.bigint "group_id"
+    t.bigint "paid_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id"], name: "index_expenses_on_group_id"
+    t.index ["paid_by_id"], name: "index_expenses_on_paid_by_id"
+  end
 
   create_table "groups", force: :cascade do |t|
     t.string "name"
     t.integer "category", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "transactions", force: :cascade do |t|
+    t.bigint "from_id"
+    t.bigint "to_id"
+    t.float "amount"
+    t.bigint "expense_id"
+    t.bigint "group_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expense_id"], name: "index_transactions_on_expense_id"
+    t.index ["from_id"], name: "index_transactions_on_from_id"
+    t.index ["group_id"], name: "index_transactions_on_group_id"
+    t.index ["to_id"], name: "index_transactions_on_to_id"
   end
 
   create_table "user_groups", force: :cascade do |t|
@@ -41,4 +67,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_23_070215) do
     t.index ["email"], name: "index_users_on_email"
   end
 
+  add_foreign_key "expenses", "users", column: "paid_by_id"
+  add_foreign_key "transactions", "users", column: "from_id"
+  add_foreign_key "transactions", "users", column: "to_id"
 end
