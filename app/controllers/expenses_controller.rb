@@ -2,8 +2,7 @@ class ExpensesController < ApplicationController
   def create
     @expense = Expense.new(expense_params)
     unless validate_transactions.empty?
-      return render json: { error: validate_transactions },
-                    status: :unprocessable_entity
+      return render json: { error: validate_transactions }, status: :unprocessable_entity
     end
 
     add_transactions
