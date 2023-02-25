@@ -3,14 +3,13 @@ class GroupsBlueprint < Blueprinter::Base
   view :normal do
     field :name
     field :category, name: :type
-    field :members do |group, options|
+    field :members do |group, _options|
       res = []
+      # for every user, get a cumulative balance as part of the group.
+      # Display that.
       group.users.each do |user|
-        paid = group.transactions.where({ from_id: options[:current_user].id,
-                                          to_id: user.id }).select(:amount).map(&:amount).inject(0.0, :+)
-        owed = group.transactions.where({ from_id: user.id,
-                                          to_id: options[:current_user].id })
-                    .select(:amount).map(&:amount).inject(0.0, :+)
+        owed = group.transactions.where({ to_id: user.id }).select(:amount).map(&:amount).inject(0.0, :+)
+        paid = group.transactions.where({ from_id: user.id }).select(:amount).map(&:amount).inject(0.0, :+)
         res += [{
           user_id: user.id,
           name: user.name,
