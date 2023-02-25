@@ -1,7 +1,10 @@
 class ExpensesController < ApplicationController
   def create
     @expense = Expense.new(expense_params)
-    return render json: { error: validate_transactions }, status: :unprocessable_entity unless validate_transactions
+    unless validate_transactions.empty?
+      return render json: { error: validate_transactions },
+                    status: :unprocessable_entity
+    end
 
     add_transactions
     if @expense.save
@@ -14,11 +17,13 @@ class ExpensesController < ApplicationController
   private
 
   def validate_transactions
-    validations = %i[validate_expense validate_member_count validate_members validate_balances]
+    validations = %i[validate_expense validate_friend_group validate_member_count validate_members validate_balances]
+    errors = []
     validations.each do |validation|
-      return send validation unless send validation
+      res = send(validation)
+      errors += res if res != true
     end
-    true
+    errors
   end
 
   def validate_expense
@@ -27,20 +32,27 @@ class ExpensesController < ApplicationController
     @expense.errors.full_messages
   end
 
-  def validate_member_count
-    unless (expense_params[:category] == 'multiple') || (transaction_params[:members]&.size || 0) == 2
-      return ['Only multiple expenses can have more than 2 members']
-    end
+  def validate_friend_group
+    return true if (expense_params[:category] == 'multiple') || ((expense_params[:paid_by_id] || 0) == @current_user.id)
 
-    true
+    ['A user cannot record payments between 2 different users']
+  end
+
+  def validate_member_count
+    return true if (expense_params[:category] == 'multiple') || ((transaction_params[:members]&.size || 0) == 2)
+
+    ['Only multiple expenses can have more than 2 members']
   end
 
   def validate_members
-    return true if transaction_params[:members]&.all? do |member|
-      (member[:owed].is_a? Float) && Group.find(transaction_params[:group_id]).user_ids.include?(member[:user_id])
+    errors = []
+    errors << 'All amounts should be in decimal format' unless transaction_params[:members]&.all? do |member|
+      (member[:owed].is_a? Float)
     end
-
-    ['All amounts should be in decimal format']
+    errors << 'Only members in the group can take part in an expense' unless transaction_params[:members]&.all? do |member|
+      Group.find(transaction_params[:group_id]).user_ids.include?(member[:user_id])
+    end
+    errors
   end
 
   def validate_balances

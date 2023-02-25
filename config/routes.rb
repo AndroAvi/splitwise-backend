@@ -4,7 +4,6 @@ Rails.application.routes.draw do
   resources :groups, only: %i[create index]
   resources :expenses, only: %i[create]
   post '/users/login', to: 'users#login'
-  put '/groups/users', to: 'groups#add_user'
   get '/users/search', to: 'users#search'
   # Defines the root path route ('/')
   # root 'articles#index'
