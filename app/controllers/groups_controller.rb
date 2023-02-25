@@ -11,7 +11,7 @@ class GroupsController < ApplicationController
     if @group.save
       render json: { group: GroupsBlueprint.render_as_json(@group, view: :normal) }, status: :created
     else
-      render json: { error: @group.errors.full_messages }, status: unprocessable_entity
+      render json: { error: @group.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
