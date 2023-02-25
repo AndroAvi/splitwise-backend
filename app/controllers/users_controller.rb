@@ -20,7 +20,8 @@ class UsersController < ApplicationController
     if !@user
       render json: { error: ['User not found'] }, status: :not_found
     elsif @user.authenticate(login_params[:password])
-      render json: { token: @user.generate_auth_token }, status: :accepted
+      render json: { user: UsersBlueprint.render_as_json(@user, view: :normal), token: @user.generate_auth_token },
+             status: :accepted
     else
       render json: { error: ['Invalid username or password'] }, status: :unauthorized
     end
