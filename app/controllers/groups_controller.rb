@@ -22,6 +22,44 @@ class GroupsController < ApplicationController
     end
   end
 
+  def settle_up
+    @group = Group.find(params[:id])
+    expenses_attributes = @group.users.map do |user|
+      amount = @current_user.paid_transactions.where({ group_id: @group.id, to_id: user.id })
+                            .select(:amount).map(&:amount).inject(0.0, :+) - \
+               @current_user.owed_transactions.where({ from_id: user.id, group_id: @group.id })
+                            .select(:amount).map(&:amount).inject(0.0, :+)
+
+      if amount.zero?
+        {}
+      else
+        {
+          category: 'individual',
+          amount: amount.abs,
+          group_id: params[:id],
+          paid_by_id: amount.positive? ? user.id : @current_user.id,
+          transactions_attributes: [
+            {
+              from_id: amount.positive? ? user.id : @current_user.id,
+              to_id: amount.positive? ? @current_user.id : user.id,
+              amount: amount.abs,
+              group_id: params[:id]
+            },
+            {
+              from_id: amount.positive? ? user.id : @current_user.id,
+              to_id: amount.positive? ? user.id : @current_user.id,
+              amount: 0.0,
+              group_id: params[:id]
+            }
+          ]
+        }
+      end
+    end.compact_blank
+    @expenses = Expense.create(expenses_attributes)
+    render json: { expenses: ExpensesBlueprint.render_as_json(@expenses, view: :normal, user_id: @current_user.id) },
+           status: :ok
+  end
+
   private
 
   def create_friend_groups(user_ids)

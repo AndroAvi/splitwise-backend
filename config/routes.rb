@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :groups, only: %i[create index show] do
     resources :expenses, only: %i[create index]
   end
+  put '/groups/:id', to: 'groups#settle_up'
   post '/users/login', to: 'users#login'
   get '/users/search', to: 'users#search'
   # Defines the root path route ('/')

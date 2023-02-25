@@ -8,6 +8,7 @@ class Expense < ApplicationRecord
   belongs_to :user, foreign_key: 'paid_by_id', inverse_of: :expenses
   belongs_to :group, inverse_of: :expenses
   has_many :transactions, inverse_of: :expense, dependent: :destroy
+  accepts_nested_attributes_for :transactions
   def set_title
     self.title = 'Payment' unless category == 'multiple'
   end
