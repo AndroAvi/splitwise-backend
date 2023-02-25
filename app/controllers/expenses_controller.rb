@@ -1,6 +1,6 @@
 class ExpensesController < ApplicationController
   def create
-    @expense = Expense.new(expense_params)
+    @expense = Expense.new({ group_id: params[:group_id], **expense_params })
     unless validate_transactions.empty?
       return render json: { error: validate_transactions }, status: :unprocessable_entity
     end
@@ -49,7 +49,7 @@ class ExpensesController < ApplicationController
       (member[:owed].is_a? Float)
     end
     errors << 'Only members in the group can take part in an expense' unless transaction_params[:members]&.all? do |member|
-      Group.find(transaction_params[:group_id]).user_ids.include?(member[:user_id])
+      Group.find(params[:group_id]).user_ids.include?(member[:user_id])
     end
     errors
   end
@@ -63,7 +63,7 @@ class ExpensesController < ApplicationController
   end
 
   def add_transactions
-    group_id = transaction_params[:group_id]
+    group_id = params[:group_id]
     from_id = expense_params[:paid_by_id]
     transaction_params[:members]&.each do |member|
       unless from_id == member[:user_id]
@@ -74,10 +74,10 @@ class ExpensesController < ApplicationController
   end
 
   def expense_params
-    params.require(:expense).permit(:title, :amount, :group_id, :paid_by_id, :category)
+    params.require(:expense).permit(:title, :amount, :paid_by_id, :category)
   end
 
   def transaction_params
-    params.require(:expense).permit(:group_id, :paid_by_id, members: %i[user_id owed])
+    params.require(:expense).permit(:paid_by_id, members: %i[user_id owed])
   end
 end
