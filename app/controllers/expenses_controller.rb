@@ -7,10 +7,17 @@ class ExpensesController < ApplicationController
 
     add_transactions
     if @expense.save
-      render json: { expense: @expense }, status: :created
+      render json: { expense: ExpensesBlueprint.render_as_json(@expense, view: :normal, user_id: @current_user.id) },
+             status: :created
     else
       render json: { error: @expense.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  def index
+    @expenses = Group.find(params[:group_id]).expenses
+    render json: { expenses: ExpensesBlueprint.render_as_json(@expenses, view: :normal, user_id: @current_user.id) },
+           status: :ok
   end
 
   private
@@ -66,10 +73,8 @@ class ExpensesController < ApplicationController
     group_id = params[:group_id]
     from_id = expense_params[:paid_by_id]
     transaction_params[:members]&.each do |member|
-      unless from_id == member[:user_id]
-        @expense.transactions.build({ group_id:, from_id:, to_id: member[:user_id],
-                                      amount: member[:owed] })
-      end
+      @expense.transactions.build({ group_id:, from_id:, to_id: member[:user_id],
+                                    amount: member[:owed] })
     end
   end
 
