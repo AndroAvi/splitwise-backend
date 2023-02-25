@@ -1,6 +1,6 @@
-require_relative "boot"
+require_relative 'boot'
 
-require "rails/all"
+require 'rails/all'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -10,6 +10,9 @@ module SplitwiseBackend
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
+    Blueprinter.configure do |config|
+      config.sort_fields_by = :definition
+    end
 
     # Configuration for the application, engines, and railties goes here.
     #

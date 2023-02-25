@@ -4,12 +4,19 @@ class GroupsController < ApplicationController
     render json: GroupsBlueprint.render(@groups, view: :index)
   end
 
+  def show
+    @group = Group.find(params[:id])
+    render json: { group: GroupsBlueprint.render_as_json(@group, view: :normal, current_user: @current_user) },
+           status: :ok
+  end
+
   def create
     @group = Group.new(create_group_params)
     @group.user_groups.build({ user_id: @current_user.id, group_id: @group.id, owner: true })
     create_friend_groups(create_group_params[:user_ids])
     if @group.save
-      render json: { group: GroupsBlueprint.render_as_json(@group, view: :normal) }, status: :created
+      render json: { group: GroupsBlueprint.render_as_json(@group, view: :normal, current_user: @current_user) },
+             status: :created
     else
       render json: { error: @group.errors.full_messages }, status: :unprocessable_entity
     end
