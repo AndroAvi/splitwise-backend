@@ -66,9 +66,17 @@ class GroupsController < ApplicationController
     ids = ((user_ids || []) << @current_user.id).sort
     ids&.each_with_index do |_, i|
       (i + 1..ids.size - 1).each do |j|
+        next if friend_group_exists?(ids[i], ids[j])
+
         Group.create({ category: :friend, user_ids: [ids[i], ids[j]] })
       end
     end
+  end
+
+  def friend_group_exists?(id1, id2)
+    res = (UserGroup.joins("INNER JOIN groups g ON g.id = user_groups.group_id AND g.category=1 INNER JOIN user_groups ug1 ON ug1.group_id = user_groups.group_id AND ug1.user_id = #{id1} AND user_groups.user_id = #{id2}")
+       &.size || 0)
+    !res.zero?
   end
 
   def create_group_params
