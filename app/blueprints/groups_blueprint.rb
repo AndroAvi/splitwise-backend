@@ -23,9 +23,6 @@ class GroupsBlueprint < Blueprinter::Base
   view :index do
     field :name
     field :category, name: :type
-    association :users, name: :members, blueprint: UsersBlueprint, view: :normal, if: lambda {
-      |_field_name, group, _options|
-                                                                                        group.category == 'friend'
-                                                                                      }
+    association :users, name: :members, blueprint: UsersBlueprint, view: :normal
   end
 end
