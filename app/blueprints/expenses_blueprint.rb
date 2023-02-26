@@ -7,7 +7,9 @@ class ExpensesBlueprint < Blueprinter::Base
     association :transactions, name: :members, blueprint: TransactionsBlueprint, view: :normal
     field :balance do |expense, options|
       amount_owed = expense.transactions.find_by({ to_id: options[:user_id] })&.amount
-      if options[:user_id] == expense[:paid_by_id]
+      if amount_owed.nil?
+        'not involved'
+      elsif options[:user_id] == expense[:paid_by_id]
         expense[:amount] - amount_owed
       else
         amount_owed * -1.0
