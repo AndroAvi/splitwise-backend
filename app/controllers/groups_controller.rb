@@ -11,15 +11,22 @@ class GroupsController < ApplicationController
   end
 
   def create
-    @group = Group.new(create_group_params)
+    @group = Group.new(group_params)
     @group.user_groups.build({ user_id: @current_user.id, group_id: @group.id, owner: true })
-    create_friend_groups(create_group_params[:user_ids])
+    create_friend_groups(group_params[:user_ids])
     if @group.save
       render json: { group: GroupsBlueprint.render_as_json(@group, view: :index) },
              status: :created
     else
       render json: { error: @group.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  def update
+    @group = Group.find(params[:id])
+    @group.update(update_params)
+    create_friend_groups(group_params[:user_ids])
+    render json: { group: GroupsBlueprint.render_as_json(@group, view: :index) }, status: :ok
   end
 
   def settle_up
@@ -79,7 +86,15 @@ class GroupsController < ApplicationController
     !res.zero?
   end
 
-  def create_group_params
+  def group_params
     params.require(:group).permit(:name, :simplify, user_ids: [])
+  end
+
+  def update_params
+    {
+      name: group_params[:name] || @group.name,
+      simplify: group_params[:simplify] || @group.simplify,
+      user_ids: @group.user_ids | (group_params[:user_ids] || [])
+    }
   end
 end
