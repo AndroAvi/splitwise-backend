@@ -23,7 +23,7 @@ class ExpensesController < ApplicationController
   private
 
   def validate_transactions
-    validations = %i[validate_expense validate_friend_group validate_member_count validate_members validate_balances]
+    validations = %i[validate_expense validate_member_count validate_members validate_balances]
     errors = []
     validations.each do |validation|
       res = send(validation)
@@ -38,11 +38,11 @@ class ExpensesController < ApplicationController
     @expense.errors.full_messages
   end
 
-  def validate_friend_group
-    return true if (expense_params[:category] == 'multiple') || ((expense_params[:paid_by_id] || 0) == @current_user.id)
+  # def validate_friend_group
+  #   return true if (expense_params[:category] == 'multiple') || ((expense_params[:paid_by_id] || 0) == @current_user.id)
 
-    ['A user cannot record payments between 2 different users']
-  end
+  #   ['A user cannot record payments between 2 different users']
+  # end
 
   def validate_member_count
     return true if (expense_params[:category] == 'multiple') || ((transaction_params[:members]&.size || 0) == 2)
