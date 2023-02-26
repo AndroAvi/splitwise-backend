@@ -114,6 +114,7 @@ GEM
     nokogiri (1.14.2-x86_64-linux)
       racc (~> 1.4)
     pg (1.4.5)
+    priority_queue_cxx (0.3.6)
     puma (5.6.5)
       nio4r (~> 2.0)
     racc (1.6.2)
@@ -171,6 +172,7 @@ DEPENDENCIES
   figaro (~> 1.2)
   jwt (~> 2.7)
   pg (~> 1.1)
+  priority_queue_cxx (~> 0.3.6)
   puma (~> 5.0)
   rack-cors
   rails (~> 7.0.4, >= 7.0.4.2)

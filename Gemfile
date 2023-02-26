@@ -51,3 +51,5 @@ gem 'jwt', '~> 2.7'
 gem "figaro", "~> 1.2"
 
 gem "blueprinter", "~> 0.25.3"
+
+gem "priority_queue_cxx", "~> 0.3.6"
