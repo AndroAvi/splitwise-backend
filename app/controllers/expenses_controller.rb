@@ -91,6 +91,6 @@ class ExpensesController < ApplicationController
   end
 
   def transaction_params
-    params.require(:expense).permit(:paid_by_id, members: %i[user_id owed])
+    params.require(:expense).permit(:paid_by_id, members: [:user_id, :owed])
   end
 end

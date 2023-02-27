@@ -4,7 +4,14 @@ class ExpensesBlueprint < Blueprinter::Base
     fields :title, :amount, :group_id, :created_at, :updated_at
     field :category, name: :type
     association :user, name: :paid_by, blueprint: UsersBlueprint, view: :normal
-    association :transactions, name: :members, blueprint: TransactionsBlueprint, view: :normal
+    field :members do |expense, _options|
+      res = {}
+      expense.transactions.map do |transaction|
+        res[transaction.to.id] = TransactionsBlueprint.render_as_hash(transaction, view: :normal)
+      end
+      res
+    end
+    # association :transactions, name: :members, blueprint: TransactionsBlueprint, view: :normal
     field :balance do |expense, options|
       amount_owed = expense.transactions.find_by({ to_id: options[:user_id] })&.amount
       if amount_owed.nil?

@@ -8,6 +8,7 @@ class TransactionsBlueprint < Blueprinter::Base
     association :to, name: :user, blueprint: UsersBlueprint, view: :normal
     field :amount, name: :owed
   end
+
   view :balance_paid do
     association :to, name: :user, blueprint: UsersBlueprint, view: :normal
     field :amount
