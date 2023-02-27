@@ -91,10 +91,12 @@ class GroupsController < ApplicationController
   end
 
   def update_params
-    {
-      name: group_params[:name] || @group.name,
-      simplify: group_params[:simplify] || @group.simplify,
-      user_ids: @group.user_ids | (group_params[:user_ids] || [])
-    }
+    res = {}
+    %i[name simplify].each do |field|
+      res[field] = group_params[field] unless group_params[field].nil?
+    end
+
+    res[:user_ids] = @group.user_ids | (group_params[:user_ids] || [])
+    res
   end
 end

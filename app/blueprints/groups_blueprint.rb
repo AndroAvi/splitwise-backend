@@ -96,6 +96,7 @@ class GroupsBlueprint < Blueprinter::Base
   view :index do
     field :name
     field :category, name: :type
+    field :simplify
     association :users, name: :members, blueprint: UsersBlueprint, view: :normal
   end
 end
