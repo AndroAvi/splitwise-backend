@@ -11,8 +11,10 @@ module SplitwiseBackend
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
     Blueprinter.configure do |config|
+      config.generator = Oj
       config.sort_fields_by = :definition
     end
+    Oj.optimize_rails
 
     # Configuration for the application, engines, and railties goes here.
     #
