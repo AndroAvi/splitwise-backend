@@ -22,8 +22,14 @@ class ExpensesController < ApplicationController
 
   private
 
+  def valid_float?(str)
+    !!Float(str)
+  rescue StandardError
+    false
+  end
+
   def validate_transactions
-    validations = %i[validate_expense validate_member_count validate_members validate_balances]
+    validations = %i[validate_expense validate_member_count validate_float_amounts validate_members validate_balances]
     errors = []
     validations.each do |validation|
       res = send(validation)
@@ -38,33 +44,35 @@ class ExpensesController < ApplicationController
     @expense.errors.full_messages
   end
 
-  # def validate_friend_group
-  #   return true if (expense_params[:category] == 'multiple') || ((expense_params[:paid_by_id] || 0) == @current_user.id)
-
-  #   ['A user cannot record payments between 2 different users']
-  # end
-
   def validate_member_count
     return true if (expense_params[:category] == 'multiple') || ((transaction_params[:members]&.size || 0) == 2)
 
     ['Only multiple expenses can have more than 2 members']
   end
 
-  def validate_members
-    errors = []
-    errors << 'All amounts should be in decimal format' unless transaction_params[:members]&.all? do |member|
-      (member[:owed].is_a? Float)
+  def validate_float_amounts
+    begin
+      transaction_params[:members]&.each do |member|
+        Float(member[:owed])
+      end
+    rescue ArgumentError
+      return ['All amounts should be valid decimals']
     end
-    errors << 'Only members in the group can take part in an expense' unless transaction_params[:members]&.all? do |member|
+    true
+  end
+
+  def validate_members
+    return true if transaction_params[:members]&.all? do |member|
       Group.find(params[:group_id]).user_ids.include?(member[:user_id])
     end
-    errors
+
+    ['Only members in the group can take part in an expense']
   end
 
   def validate_balances
     return true if (transaction_params[:members]&.reduce(0.0) do |sum, member|
-      sum + member[:owed]
-    end&.- expense_params[:amount]).abs <= 1e-2
+      sum + member[:owed].to_f
+    end&.- expense_params[:amount].to_f).abs <= 1e-2
 
     ['All members contributions should add up to the total amount']
   end
@@ -74,7 +82,7 @@ class ExpensesController < ApplicationController
     from_id = expense_params[:paid_by_id]
     transaction_params[:members]&.each do |member|
       @expense.transactions.build({ group_id:, from_id:, to_id: member[:user_id],
-                                    amount: member[:owed] })
+                                    amount: member[:owed].to_f })
     end
   end
 
