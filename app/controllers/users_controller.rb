@@ -30,7 +30,7 @@ class UsersController < ApplicationController
   def search
     @users = case search_params[:by]
              when 'name' then User.where('name ~ ?', search_params[:value])
-             when 'email' then User.where(search_params[:value])
+             when 'email' then User.where({ email: search_params[:value] })
              else []
              end
     if @users
